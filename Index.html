@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Old Parr On Demand - Máquina de Doses</title>
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#0f0d0a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#e9e2d3;}
+  #app{max-width:640px;margin:0 auto;padding:16px 16px 48px;}
+  .controls{display:flex;gap:8px;margin-bottom:10px;}
+  .controls button{flex:1;padding:12px 10px;font-size:14px;font-weight:600;border-radius:10px;border:1px solid #c9a24d;background:#141210;color:#e9e2d3;cursor:pointer;transition:.15s;}
+  .controls button.active{background:#c9a24d;color:#1a1610;border-color:#c9a24d;}
+
+  #canvas-wrap{
+    position:relative;width:100%;
+    height:66vh; height:66dvh;
+    min-height:460px; max-height:760px;
+    border-radius:18px;overflow:hidden;
+    background:radial-gradient(circle at 50% 30%, #2a2620, #100e0b 75%);
+    touch-action:none;
+  }
+  #c{width:100%;height:100%;display:block;cursor:grab;}
+  #c:active{cursor:grabbing;}
+  .hint{position:absolute;left:12px;right:12px;bottom:10px;font-size:11px;color:#d8c07d;opacity:.7;text-align:center;pointer-events:none;letter-spacing:.02em;}
+
+  .section{margin-top:30px;}
+  .kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c23b2e;font-weight:700;margin-bottom:6px;}
+  .section h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;color:#e7c988;margin:0 0 8px;line-height:1.25;}
+  .section p.lead{color:#b9b2a2;font-size:14px;line-height:1.55;margin:0 0 18px;max-width:56ch;}
+
+  .modes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px;}
+  .mode-card{background:#141210;border:1px solid #2a2620;border-radius:12px;padding:14px 6px;text-align:center;}
+  .mode-card .tag{display:block;font-size:12px;color:#e7c988;font-weight:700;letter-spacing:.04em;margin-bottom:4px;}
+  .mode-card .ml{display:block;font-size:11px;color:#8b8578;}
+
+  .feature-grid{display:grid;grid-template-columns:1fr;gap:10px;}
+  .feature-card{background:#141210;border:1px solid #2a2620;border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;}
+  .feature-card .ic{font-size:18px;line-height:1;flex-shrink:0;width:36px;height:36px;border-radius:10px;background:#1c1913;border:1px solid #c9a24d;display:flex;align-items:center;justify-content:center;}
+  .feature-card h3{margin:0 0 3px;font-size:14.5px;color:#f2e6c8;}
+  .feature-card p{margin:0;font-size:12.5px;color:#a79f8f;line-height:1.5;}
+
+  .footer-note{margin-top:26px;font-size:11px;color:#665f52;text-align:center;line-height:1.6;}
+
+  @media (min-width:480px){
+    .feature-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="controls">
+    <button id="btnFront" class="active">Painel frontal</button>
+    <button id="btnInterior">Interior técnico</button>
+  </div>
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+    <div class="hint">Arraste para girar · scroll ou pinça para aproximar · toque no card para comprar</div>
+  </div>
+
+  <div class="section">
+    <div class="kicker">Vending premium · autoatendimento</div>
+    <h2>Uma máquina, três momentos</h2>
+    <p class="lead">A Old Parr On Demand serve doses em poucos segundos, com pagamento via Pix instantâneo e gestão 100% integrada — feita para bares, eventos e pontos de alto giro que não podem parar.</p>
+    <div class="modes-grid">
+      <div class="mode-card"><span class="tag">DOSE</span><span class="ml">30 ml</span></div>
+      <div class="mode-card"><span class="tag">DUPLA</span><span class="ml">60 ml</span></div>
+      <div class="mode-card"><span class="tag">PREMIUM</span><span class="ml">100 ml</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="ic">⚡</div>
+        <div>
+          <h3>Pix instantâneo, sem travar</h3>
+          <p>Pagamento aprovado na hora, sem filas nem lentidão: o cliente escaneia, paga e recebe a dose em segundos.</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="ic">🔒</div>
+        <div>
+          <h3>Sistema próprio de pagamentos</h3>
+          <p>Plataforma de cobrança desenvolvida internamente, sem depender de maquininhas ou intermediários externos.</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="ic">📊</div>
+        <div>
+          <h3>Gestão integrada de vendas e produtos</h3>
+          <p>Painel próprio acompanha vendas, estoque e reposição em tempo real, direto do celular do operador.</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="ic">🥃</div>
+        <div>
+          <h3>3 modos de servir</h3>
+          <p>Dose, Dupla e Premium: o cliente escolhe a experiência direto no painel frontal, sem atendente.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Venda proibida para menores de 18 anos · Consuma com moderação</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var wrap = document.getElementById('canvas-wrap');
+  var canvas = document.getElementById('c');
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(44, 1, 0.1, 100);
+  var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+
+  function resize(){
+    var w = wrap.clientWidth, h = wrap.clientHeight;
+    renderer.setSize(w,h,false);
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+
+  scene.add(new THREE.AmbientLight(0xfff4e0, 0.55));
+  var key = new THREE.DirectionalLight(0xffffff, 0.85);
+  key.position.set(4,9,6);
+  scene.add(key);
+  var fillL = new THREE.DirectionalLight(0xffe6c2, 0.3);
+  fillL.position.set(-6,3,-5);
+  scene.add(fillL);
+  var warm = new THREE.PointLight(0xffb347, 0.7, 14);
+  warm.position.set(0,3.2,3.5);
+  scene.add(warm);
+
+  var blackMat  = new THREE.MeshStandardMaterial({color:0x17140f, roughness:0.55, metalness:0.3});
+  var amberGlow = new THREE.MeshStandardMaterial({color:0xffbb55, emissive:0xff9d2e, emissiveIntensity:1.4, roughness:0.4});
+  var redGlow   = new THREE.MeshStandardMaterial({color:0xff6a52, emissive:0xe8341f, emissiveIntensity:1.1, roughness:0.4});
+  var glassMat  = new THREE.MeshPhysicalMaterial({color:0xffffff, transparent:true, opacity:0.16, roughness:0.05, metalness:0, side:THREE.DoubleSide});
+  var liquidMat = new THREE.MeshStandardMaterial({color:0xbf7a2e, transparent:true, opacity:0.92, roughness:0.25});
+  var silverMat = new THREE.MeshStandardMaterial({color:0xb7b7b7, roughness:0.35, metalness:0.7});
+  var rubberMat = new THREE.MeshStandardMaterial({color:0x0a0a0a, roughness:0.85});
+  var trayMat   = new THREE.MeshStandardMaterial({color:0x0c0c0c, roughness:0.6, metalness:0.4});
+  var enclosureMat = new THREE.MeshPhysicalMaterial({color:0xdfe9e4, transparent:true, opacity:0.35, roughness:0.15});
+  var boxDarkMat = new THREE.MeshStandardMaterial({color:0x1c1c1c, roughness:0.5, metalness:0.3});
+  var tubeMat   = new THREE.MeshStandardMaterial({color:0xe4e4e0, roughness:0.5});
+  var blueCapMat= new THREE.MeshStandardMaterial({color:0x1f6fb2, roughness:0.35, metalness:0.3});
+  var bottleMat = new THREE.MeshPhysicalMaterial({color:0xdfeaf7, transparent:true, opacity:0.28, roughness:0.05});
+  var liquid2Mat= new THREE.MeshStandardMaterial({color:0xcfd8dd, transparent:true, opacity:0.5, roughness:0.3});
+
+  function makeTex(w,h,drawFn){
+    var cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    var ctx = cv.getContext('2d');
+    drawFn(ctx,w,h);
+    var t = new THREE.CanvasTexture(cv);
+    t.needsUpdate = true;
+    return t;
+  }
+
+  function makeDynamicTex(w,h){
+    var cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    var ctx = cv.getContext('2d');
+    var t = new THREE.CanvasTexture(cv);
+    return {canvas:cv, ctx:ctx, tex:t};
+  }
+
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function addPlane(tex,w,h,x,y,z,ry,parent){
+    var geo = new THREE.PlaneGeometry(w,h);
+    var mat = new THREE.MeshBasicMaterial({map:tex, transparent:true, side:THREE.DoubleSide, depthWrite:false});
+    var m = new THREE.Mesh(geo, mat);
+    m.position.set(x,y,z);
+    if(ry) m.rotation.y = ry;
+    (parent||machine).add(m);
+    return m;
+  }
+
+  var machine = new THREE.Group();
+  scene.add(machine);
+
+  var boxW = 3.3, boxH = 4.9, boxD = 1.9;
+
+  // ---- FRONT GROUP ----
+  var frontGroup = new THREE.Group();
+  machine.add(frontGroup);
+
+  var cabinet = new THREE.Mesh(new THREE.BoxGeometry(boxW,boxH,boxD), blackMat);
+  cabinet.position.y = boxH/2;
+  frontGroup.add(cabinet);
+
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(p){
+    var foot = new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.13,0.14,14), rubberMat);
+    foot.position.set(p[0]*(boxW/2-0.28), -0.07, p[1]*(boxD/2-0.28));
+    frontGroup.add(foot);
+  });
+
+  var frontZ = boxD/2 + 0.015;
+
+  [
+    [boxW-0.16, 0.045, 0, boxH-0.1],
+    [boxW-0.16, 0.045, 0, 0.1],
+    [0.045, boxH-0.25, -(boxW/2-0.1), boxH/2],
+    [0.045, boxH-0.25, (boxW/2-0.1), boxH/2]
+  ].forEach(function(b){
+    var bar = new THREE.Mesh(new THREE.BoxGeometry(b[0],b[1],0.05), amberGlow);
+    bar.position.set(b[2], b[3], frontZ);
+    frontGroup.add(bar);
+  });
+
+  var archTex = makeTex(900,380,function(ctx,w,h){
+    var margin=24, baseY=180, r=(w-2*margin)/2, cx=w/2;
+    ctx.clearRect(0,0,w,h);
+    ctx.beginPath();
+    ctx.moveTo(margin,h-margin);
+    ctx.lineTo(margin,baseY);
+    ctx.arc(cx,baseY,r,Math.PI,2*Math.PI,false);
+    ctx.lineTo(w-margin,h-margin);
+    ctx.closePath();
+    ctx.fillStyle = '#141210';
+    ctx.fill();
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = '#c9a24d';
+    ctx.stroke();
+    var word='Old Parr';
+    ctx.font = '700 90px Georgia, serif';
+    var oW = ctx.measureText('O').width;
+    var fullW = ctx.measureText(word).width;
+    var startX = cx - fullW/2;
+    ctx.textBaseline='middle';
+    ctx.textAlign='left';
+    ctx.fillStyle='#c23b2e';
+    ctx.fillText('O', startX, h-190);
+    ctx.fillStyle='#e7c988';
+    ctx.fillText('ld Parr', startX+oW, h-190);
+    ctx.textAlign='center';
+    ctx.font='400 30px Georgia, serif';
+    ctx.fillStyle='#d8b866';
+    ctx.fillText('V I V A   C A D A   M O M E N T O', cx, h-115);
+  });
+  addPlane(archTex, 3.9, 1.65, 0, boxH+0.62, frontZ+0.05, 0, frontGroup);
+
+  var compreTex = makeTex(760,190,function(ctx,w,h){
+    ctx.clearRect(0,0,w,h);
+    roundRect(ctx,10,10,w-20,h-20,h/2-10);
+    ctx.fillStyle='#c9a24d';
+    ctx.fill();
+    ctx.font='700 68px Arial'; ctx.fillStyle='#1a1a1a';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('COMPRE AQUI', w/2, h/2+4);
+  });
+  addPlane(compreTex, 2.85, 0.72, 0, boxH-0.7, frontZ, 0, frontGroup);
+
+  var purchaseButtons = [];
+  var cardDefs = [
+    {label:'DOSE', sub:'30 ml', glasses:1},
+    {label:'DUPLA', sub:'60 ml', glasses:2},
+    {label:'PREMIUM', sub:'100 ml', glasses:1}
+  ];
+  var cardY0 = boxH-1.46, cardGap=0.85;
+  cardDefs.forEach(function(c,i){
+    var tex = makeTex(420,420,function(ctx,w,h){
+      ctx.clearRect(0,0,w,h);
+      roundRect(ctx,8,8,w-16,h-16,26);
+      ctx.fillStyle='#141210'; ctx.fill();
+      ctx.lineWidth=4; ctx.strokeStyle='#c9a24d'; ctx.stroke();
+      ctx.strokeStyle='#e7d9b8'; ctx.lineWidth=8; ctx.lineCap='round';
+      var gx = c.glasses===2 ? [150,270] : [210];
+      gx.forEach(function(x){
+        ctx.strokeRect(x-44,80,88,130);
+      });
+      ctx.font='700 48px Arial'; ctx.fillStyle='#f2e6c8';
+      ctx.textAlign='center';
+      ctx.fillText(c.label, w/2, 265);
+      ctx.font='400 36px Arial'; ctx.fillStyle='#d8b866';
+      ctx.fillText(c.sub, w/2, 312);
+      roundRect(ctx, w/2-115, 335, 230, 50, 25);
+      ctx.fillStyle='#e9c976';
+      ctx.fill();
+      ctx.font='700 26px Arial'; ctx.fillStyle='#1a1a1a';
+      ctx.textBaseline='middle';
+      ctx.fillText('TOCAR AQUI', w/2, 335+25);
+      ctx.textBaseline='alphabetic';
+    });
+    var y = cardY0 - i*cardGap;
+    var cardPlane = addPlane(tex, 0.75, 0.75, -0.75, y, frontZ, 0, frontGroup);
+    cardPlane.userData = {product: c.label, ml: c.sub};
+    purchaseButtons.push(cardPlane);
+  });
+
+  var recess = new THREE.Mesh(new THREE.BoxGeometry(1.15,2.0,0.35), boxDarkMat);
+  recess.position.set(0.85, boxH-1.9, frontZ-0.15);
+  frontGroup.add(recess);
+  var screen = new THREE.Mesh(new THREE.BoxGeometry(0.7,0.45,0.05), boxDarkMat);
+  screen.position.set(0.85, boxH-1.15, frontZ+0.05);
+  frontGroup.add(screen);
+
+  // ---- FUNCTIONAL DISPLAY ----
+  var screenDT = makeDynamicTex(340,220);
+
+  function drawScreenIdle(){
+    var ctx=screenDT.ctx, w=screenDT.canvas.width, h=screenDT.canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='#050403'; ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#c9a24d'; ctx.lineWidth=4; ctx.strokeRect(5,5,w-10,h-10);
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='700 34px Georgia, serif'; ctx.fillStyle='#e7c988';
+    ctx.fillText('OLD PARR', w/2, h*0.36);
+    ctx.font='400 20px Arial'; ctx.fillStyle='#9c9284';
+    ctx.fillText('Toque em uma dose', w/2, h*0.62);
+    ctx.font='400 16px Arial'; ctx.fillStyle='#6f6a5f';
+    ctx.fillText('para comprar', w/2, h*0.78);
+    screenDT.tex.needsUpdate = true;
+  }
+
+  function drawScreenQR(productName, secondsLeft){
+    var ctx=screenDT.ctx, w=screenDT.canvas.width, h=screenDT.canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='#070707'; ctx.fillRect(0,0,w,h);
+    ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+    ctx.font='700 17px Arial'; ctx.fillStyle='#3ec9a7';
+    ctx.fillText('PIX · '+productName, w/2, 22);
+    var qs=118, qx=(w-qs)/2, qy=32;
+    ctx.fillStyle='#fff'; ctx.fillRect(qx-6,qy-6,qs+12,qs+12);
+    ctx.fillStyle='#111';
+    var cells=13, cs=qs/cells;
+    for(var i=0;i<cells;i++){
+      for(var j=0;j<cells;j++){
+        if((i*7+j*13+(i^j)+productName.length)%5===0) ctx.fillRect(qx+i*cs,qy+j*cs,cs*0.9,cs*0.9);
+      }
+    }
+    [[0,0],[cells-3,0],[0,cells-3]].forEach(function(f){
+      ctx.fillStyle='#111'; ctx.fillRect(qx+f[0]*cs, qy+f[1]*cs, cs*3, cs*3);
+      ctx.fillStyle='#fff'; ctx.fillRect(qx+f[0]*cs+cs*0.55, qy+f[1]*cs+cs*0.55, cs*1.9, cs*1.9);
+      ctx.fillStyle='#111'; ctx.fillRect(qx+f[0]*cs+cs*1.05, qy+f[1]*cs+cs*1.05, cs*0.9, cs*0.9);
+    });
+    ctx.font='600 15px Arial'; ctx.fillStyle='#e6e2d8';
+    ctx.fillText('Aguardando pagamento', w/2, h-24);
+    ctx.font='700 20px Arial'; ctx.fillStyle='#e7c988';
+    ctx.fillText(secondsLeft+'s', w/2, h-4);
+    screenDT.tex.needsUpdate = true;
+  }
+
+  function drawScreenProcessing(){
+    var ctx=screenDT.ctx, w=screenDT.canvas.width, h=screenDT.canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='#070707'; ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#3ec9a7'; ctx.lineWidth=4; ctx.strokeRect(5,5,w-10,h-10);
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='700 22px Arial'; ctx.fillStyle='#3ec9a7';
+    ctx.fillText('PAGAMENTO', w/2, h*0.42);
+    ctx.fillText('APROVADO', w/2, h*0.60);
+    screenDT.tex.needsUpdate = true;
+  }
+
+  function drawScreenPouring(productName){
+    var ctx=screenDT.ctx, w=screenDT.canvas.width, h=screenDT.canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='#070707'; ctx.fillRect(0,0,w,h);
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='700 20px Arial'; ctx.fillStyle='#e7c988';
+    ctx.fillText('PREPARANDO', w/2, h*0.36);
+    ctx.font='400 18px Arial'; ctx.fillStyle='#c9c3b4';
+    ctx.fillText(productName, w/2, h*0.58);
+    ctx.font='400 15px Arial'; ctx.fillStyle='#6f6a5f';
+    ctx.fillText('aguarde um instante...', w/2, h*0.78);
+    screenDT.tex.needsUpdate = true;
+  }
+
+  function drawScreenDone(){
+    var ctx=screenDT.ctx, w=screenDT.canvas.width, h=screenDT.canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='#070707'; ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#c9a24d'; ctx.lineWidth=4; ctx.strokeRect(5,5,w-10,h-10);
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='700 22px Arial'; ctx.fillStyle='#e7c988';
+    ctx.fillText('RETIRE SEU COPO', w/2, h*0.42);
+    ctx.font='400 17px Arial'; ctx.fillStyle='#c9c3b4';
+    ctx.fillText('Obrigado! Viva cada momento.', w/2, h*0.65);
+    screenDT.tex.needsUpdate = true;
+  }
+
+  drawScreenIdle();
+  addPlane(screenDT.tex, 0.62, 0.40, 0.85, boxH-1.15, frontZ+0.081, 0, frontGroup);
+
+  var statusDots = [];
+  [-0.18,0,0.18].forEach(function(dx){
+    var dot = new THREE.Mesh(new THREE.SphereGeometry(0.03,10,10), redGlow);
+    dot.position.set(0.85+dx, boxH-1.42, frontZ+0.09);
+    frontGroup.add(dot);
+    statusDots.push(dot);
+  });
+
+  var nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.08,0.35,16), silverMat);
+  nozzle.position.set(0.85, boxH-1.85, frontZ+0.08);
+  frontGroup.add(nozzle);
+  var glass = new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.15,0.42,20,1,true), glassMat);
+  glass.position.set(0.85, boxH-2.55, frontZ+0.08);
+  frontGroup.add(glass);
+
+  // liquid: unit-height cylinder, scaled/positioned to simulate filling from the bottom
+  var liquidBottomY = boxH-2.74;
+  var liquidMaxH = 0.36;
+  var liquidCurrentH = 0.0001;
+  var liquid = new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.14,1,20), liquidMat);
+  liquid.position.set(0.85, liquidBottomY, frontZ+0.08);
+  liquid.scale.y = liquidCurrentH;
+  frontGroup.add(liquid);
+
+  function setLiquidHeight(h){
+    liquidCurrentH = Math.max(0.0001, h);
+    liquid.scale.y = liquidCurrentH;
+    liquid.position.y = liquidBottomY + liquidCurrentH/2;
+  }
+
+  var nozzleBottomY = (boxH-1.85) - 0.175;
+  var stream = new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,1,8), liquidMat);
+  stream.visible = false;
+  frontGroup.add(stream);
+  function updateStream(){
+    var top = nozzleBottomY;
+    var bottom = liquidBottomY + liquidCurrentH;
+    var h = Math.max(0.001, top-bottom);
+    stream.scale.y = h;
+    stream.position.set(0.85, bottom + h/2, frontZ+0.08);
+  }
+
+  var tray = new THREE.Mesh(new THREE.BoxGeometry(0.95,0.05,0.5), trayMat);
+  tray.position.set(0.85, boxH-2.85, frontZ+0.2);
+  frontGroup.add(tray);
+
+  function fillHeightFor(subLabel){
+    var ml = parseInt(subLabel,10) || 30;
+    var frac = Math.max(0.45, Math.min(1, ml/100));
+    return liquidMaxH * frac;
+  }
+
+  var pixTex = makeTex(420,460,function(ctx,w,h){
+    ctx.clearRect(0,0,w,h);
+    roundRect(ctx,8,8,w-16,h-16,22);
+    ctx.fillStyle='#101010'; ctx.fill();
+    ctx.lineWidth=4; ctx.strokeStyle='#c9a24d'; ctx.stroke();
+    roundRect(ctx,40,30,w-80,110,14);
+    ctx.fillStyle='#151515'; ctx.fill();
+    ctx.font='600 30px Arial'; ctx.fillStyle='#f0f0f0';
+    ctx.textAlign='center'; ctx.fillText('PAGUE COM', w/2, 75);
+    ctx.font='700 36px Arial'; ctx.fillStyle='#3ec9a7';
+    ctx.fillText('pix', w/2, 118);
+    var qs=200, qx=(w-qs)/2, qy=170;
+    ctx.fillStyle='#fff'; ctx.fillRect(qx-10,qy-10,qs+20,qs+20);
+    ctx.fillStyle='#111';
+    var cells=14, cs=qs/cells;
+    for(var i=0;i<cells;i++){
+      for(var j=0;j<cells;j++){
+        if((i*7+j*13+(i^j))%5===0) ctx.fillRect(qx+i*cs, qy+j*cs, cs*0.92, cs*0.92);
+      }
+    }
+    ctx.fillRect(qx,qy,cs*3,cs*3); ctx.fillStyle='#fff'; ctx.fillRect(qx+cs*0.6,qy+cs*0.6,cs*1.8,cs*1.8); ctx.fillStyle='#111'; ctx.fillRect(qx+cs*1.1,qy+cs*1.1,cs*0.8,cs*0.8);
+  });
+  addPlane(pixTex, 1.15, 1.25, boxW/2-0.75, boxH-1.55, frontZ, 0, frontGroup);
+
+  var warnTex = makeTex(360,360,function(ctx,w,h){
+    ctx.clearRect(0,0,w,h);
+    ctx.beginPath(); ctx.arc(w/2,120,80,0,Math.PI*2);
+    ctx.strokeStyle='#d4453a'; ctx.lineWidth=10; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(w/2-56,64); ctx.lineTo(w/2+56,176); ctx.strokeStyle='#d4453a'; ctx.lineWidth=8; ctx.stroke();
+    ctx.font='700 46px Arial'; ctx.fillStyle='#d4453a'; ctx.textAlign='center';
+    ctx.fillText('-18', w/2, 132);
+    ctx.font='600 26px Arial'; ctx.fillStyle='#e6e2d8';
+    ctx.fillText('PROIBIDO PARA', w/2, 250);
+    ctx.fillText('MENORES DE 18', w/2, 285);
+  });
+  addPlane(warnTex, 1.0, 1.0, -boxW/2+0.6, 0.62, frontZ, 0, frontGroup);
+
+  var hrTex = makeTex(420,300,function(ctx,w,h){
+    ctx.clearRect(0,0,w,h);
+    ctx.beginPath(); ctx.arc(w/2,h/2,110,0.9*Math.PI,2.6*Math.PI); ctx.strokeStyle='#c9a24d'; ctx.lineWidth=12; ctx.stroke();
+    ctx.font='700 88px Arial'; ctx.fillStyle='#f0ece0'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('24', w/2-18, h/2+4);
+    ctx.font='700 34px Arial'; ctx.fillStyle='#d4453a';
+    ctx.fillText('HR', w/2+58, h/2+16);
+  });
+  addPlane(hrTex, 1.7, 1.2, 0.55, 0.75, frontZ, 0, frontGroup);
+
+  // ---- INTERIOR GROUP ----
+  var interiorGroup = new THREE.Group();
+  interiorGroup.visible = false;
+  machine.add(interiorGroup);
+
+  var frame = new THREE.Mesh(new THREE.BoxGeometry(boxW,boxH,0.15), boxDarkMat);
+  frame.position.set(0, boxH/2, -boxD/2+0.1);
+  interiorGroup.add(frame);
+  var backWall = new THREE.Mesh(new THREE.BoxGeometry(boxW-0.2, boxH-0.2, 0.05), new THREE.MeshStandardMaterial({color:0x2a2622, roughness:0.8}));
+  backWall.position.set(0, boxH/2, -boxD/2+0.18);
+  interiorGroup.add(backWall);
+
+  var espTex = makeTex(300,180,function(ctx,w,h){
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='#fff'; ctx.fillRect(w/2-70,h/2-24,140,48);
+    ctx.font='700 28px Arial'; ctx.fillStyle='#111'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('ESP32', w/2, h/2+2);
+  });
+  var espBox = new THREE.Mesh(new THREE.BoxGeometry(0.85,0.6,0.35), enclosureMat);
+  espBox.position.set(-0.7, boxH-0.9, -boxD/2+0.5);
+  interiorGroup.add(espBox);
+  addPlane(espTex, 0.55, 0.35, -0.7, boxH-0.9, -boxD/2+0.68, 0, interiorGroup);
+
+  var battTex = makeTex(300,220,function(ctx,w,h){
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,w,h);
+    ctx.font='700 54px Consolas, monospace'; ctx.fillStyle='#3fdc6e'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('100', w/2, 80);
+    ctx.font='600 24px Arial'; ctx.fillStyle='#e6e2d8';
+    ctx.fillText('BATERIA', w/2, 150);
+    ctx.fillText('12.6V', w/2, 182);
+  });
+  var battBox = new THREE.Mesh(new THREE.BoxGeometry(0.75,0.85,0.3), boxDarkMat);
+  battBox.position.set(0.65, boxH-0.95, -boxD/2+0.45);
+  interiorGroup.add(battBox);
+  addPlane(battTex, 0.6, 0.68, 0.65, boxH-0.95, -boxD/2+0.61, 0, interiorGroup);
+
+  var pump = new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,0.5,18), silverMat);
+  pump.rotation.z = Math.PI/2;
+  pump.position.set(-0.75, boxH-2.1, -boxD/2+0.55);
+  interiorGroup.add(pump);
+  var pumpHead = new THREE.Mesh(new THREE.BoxGeometry(0.22,0.22,0.22), boxDarkMat);
+  pumpHead.position.set(-0.95, boxH-2.1, -boxD/2+0.55);
+  interiorGroup.add(pumpHead);
+
+  var bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.5,1.3,24), bottleMat);
+  bottle.position.set(0.4, boxH-3.5, -boxD/2+0.7);
+  interiorGroup.add(bottle);
+  var bottleLiquid = new THREE.Mesh(new THREE.CylinderGeometry(0.48,0.46,0.9,24), liquid2Mat);
+  bottleLiquid.position.set(0.4, boxH-3.65, -boxD/2+0.7);
+  interiorGroup.add(bottleLiquid);
+  var cap = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.22,20), blueCapMat);
+  cap.position.set(0.4, boxH-2.83, -boxD/2+0.7);
+  interiorGroup.add(cap);
+
+  function tubeBetween(a,b,mat,radius){
+    var dir = new THREE.Vector3().subVectors(b,a);
+    var len = dir.length();
+    var mid = new THREE.Vector3().addVectors(a,b).multiplyScalar(0.5);
+    var geo = new THREE.CylinderGeometry(radius,radius,len,8);
+    var m = new THREE.Mesh(geo, mat);
+    m.position.copy(mid);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
+    interiorGroup.add(m);
+  }
+  tubeBetween(new THREE.Vector3(-0.95, boxH-2.0, -boxD/2+0.55), new THREE.Vector3(-0.7, boxH-1.25, -boxD/2+0.55), tubeMat, 0.03);
+  tubeBetween(new THREE.Vector3(-0.85, boxH-2.15, -boxD/2+0.6), new THREE.Vector3(0.4, boxH-2.75, -boxD/2+0.7), tubeMat, 0.03);
+
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(p){
+    var foot = new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.13,0.14,14), rubberMat);
+    foot.position.set(p[0]*(boxW/2-0.28), -0.07, p[1]*(boxD/2-0.28));
+    interiorGroup.add(foot);
+  });
+
+  // ---- PURCHASE FLOW ----
+  var machineState = {busy:false};
+  var pourAnim = null;
+
+  function beginPour(toH, duration, onDone){
+    pourAnim = {fromH: liquidCurrentH, toH: toH, start: performance.now(), duration: duration, onDone: onDone};
+  }
+
+  function startPurchase(product){
+    if(machineState.busy) return;
+    machineState.busy = true;
+    var secondsLeft = 5;
+    drawScreenQR(product.product, secondsLeft);
+    var qrInterval = setInterval(function(){
+      secondsLeft--;
+      if(secondsLeft > 0){
+        drawScreenQR(product.product, secondsLeft);
+      } else {
+        clearInterval(qrInterval);
+        drawScreenProcessing();
+        setTimeout(function(){
+          drawScreenPouring(product.product);
+          stream.visible = true;
+          var targetH = fillHeightFor(product.ml);
+          beginPour(targetH, 2200, function(){
+            stream.visible = false;
+            drawScreenDone();
+            setTimeout(function(){
+              beginPour(0, 700, function(){
+                drawScreenIdle();
+                machineState.busy = false;
+              });
+            }, 2600);
+          });
+        }, 1100);
+      }
+    }, 1000);
+  }
+
+  function punch(mesh){
+    var start = performance.now(), duration = 220;
+    function step(){
+      var t = Math.min(1, (performance.now()-start)/duration);
+      var s = 1 + 0.08*Math.sin(t*Math.PI);
+      mesh.scale.set(s,s,s);
+      if(t<1) requestAnimationFrame(step); else mesh.scale.set(1,1,1);
+    }
+    step();
+  }
+
+  var raycaster = new THREE.Raycaster();
+  var pointerNDC = new THREE.Vector2();
+
+  function handleTap(clientX, clientY){
+    var rect = canvas.getBoundingClientRect();
+    pointerNDC.x = ((clientX-rect.left)/rect.width)*2-1;
+    pointerNDC.y = -((clientY-rect.top)/rect.height)*2+1;
+    raycaster.setFromCamera(pointerNDC, camera);
+    var hits = raycaster.intersectObjects(purchaseButtons);
+    if(hits.length>0){
+      var obj = hits[0].object;
+      punch(obj);
+      startPurchase(obj.userData);
+    }
+  }
+
+  // Camera framing presets, tuned so the whole machine (arch sign to feet) fills
+  // most of the frame with only a small margin - zoomed in closer than before.
+  var CAM = {
+    front:    {radius:8.8, phi:1.3614, theta:0.2967, targetY:3.05},
+    interior: {radius:7.2, phi:1.3614, theta:0.3142, targetY:2.45}
+  };
+  var target = new THREE.Vector3(0, CAM.front.targetY, 0);
+  var radius = CAM.front.radius, theta = CAM.front.theta, phi = CAM.front.phi;
+  var minPhi=0.5, maxPhi=1.5, minR=5, maxR=16;
+  var isDown=false, lastX=0,lastY=0;
+
+  function updateCamera(){
+    var x = target.x + radius*Math.sin(phi)*Math.sin(theta);
+    var y = target.y + radius*Math.cos(phi);
+    var z = target.z + radius*Math.sin(phi)*Math.cos(theta);
+    camera.position.set(x,y,z);
+    camera.lookAt(target);
+  }
+
+  var downX=0, downY=0, downTime=0, moved=false;
+  canvas.addEventListener('pointerdown', function(e){
+    isDown=true; lastX=e.clientX; lastY=e.clientY;
+    downX=e.clientX; downY=e.clientY; downTime=performance.now(); moved=false;
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', function(e){
+    if(isDown){
+      var dx = e.clientX-lastX, dy = e.clientY-lastY;
+      lastX=e.clientX; lastY=e.clientY;
+      if(Math.abs(e.clientX-downX)>4 || Math.abs(e.clientY-downY)>4) moved=true;
+      theta -= dx*0.006;
+      phi = Math.min(maxPhi, Math.max(minPhi, phi - dy*0.006));
+    } else if(frontGroup.visible){
+      var rect = canvas.getBoundingClientRect();
+      pointerNDC.x = ((e.clientX-rect.left)/rect.width)*2-1;
+      pointerNDC.y = -((e.clientY-rect.top)/rect.height)*2+1;
+      raycaster.setFromCamera(pointerNDC, camera);
+      canvas.style.cursor = raycaster.intersectObjects(purchaseButtons).length>0 ? 'pointer' : 'grab';
+    }
+  });
+  canvas.addEventListener('pointerup', function(e){
+    isDown=false;
+    var dt = performance.now()-downTime;
+    if(!moved && dt<600 && frontGroup.visible){
+      handleTap(e.clientX, e.clientY);
+    }
+  });
+  canvas.addEventListener('pointercancel', function(){isDown=false;});
+  canvas.addEventListener('wheel', function(e){
+    e.preventDefault();
+    radius = Math.min(maxR, Math.max(minR, radius + e.deltaY*0.01));
+  }, {passive:false});
+
+  var btnFront = document.getElementById('btnFront');
+  var btnInterior = document.getElementById('btnInterior');
+  btnFront.addEventListener('click', function(){
+    frontGroup.visible = true; interiorGroup.visible = false;
+    btnFront.classList.add('active'); btnInterior.classList.remove('active');
+    radius = CAM.front.radius; phi = CAM.front.phi; theta = CAM.front.theta; target.y = CAM.front.targetY;
+  });
+  btnInterior.addEventListener('click', function(){
+    frontGroup.visible = false; interiorGroup.visible = true;
+    btnInterior.classList.add('active'); btnFront.classList.remove('active');
+    canvas.style.cursor = 'grab';
+    radius = CAM.interior.radius; phi = CAM.interior.phi; theta = CAM.interior.theta; target.y = CAM.interior.targetY;
+  });
+
+  resize();
+  function animate(){
+    requestAnimationFrame(animate);
+    updateCamera();
+
+    if(pourAnim){
+      var now = performance.now();
+      var t = (now-pourAnim.start)/pourAnim.duration;
+      if(t>1) t=1;
+      var eased = t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+      setLiquidHeight(pourAnim.fromH + (pourAnim.toH-pourAnim.fromH)*eased);
+      if(t>=1){
+        var cb = pourAnim.onDone;
+        pourAnim = null;
+        if(cb) cb();
+      }
+    }
+    if(stream.visible) updateStream();
+
+    if(machineState.busy){
+      redGlow.emissiveIntensity = 0.7 + 0.5*Math.sin(performance.now()*0.006);
+    } else if(redGlow.emissiveIntensity !== 1.1){
+      redGlow.emissiveIntensity = 1.1;
+    }
+
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+</script>
+</body>
+</html>
